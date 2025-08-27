@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>رمزگذار و رمزگشا</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-black text-white min-h-screen font-sans">
+
+  <!-- هدر با سوییچ -->
+  <header class="flex items-center justify-between px-6 py-4 bg-gray-800 shadow-md">
+    <h1 class="text-xl font-bold">🔐 ابزار رمزگذاری و رمزگشایی</h1>
+    <div class="flex items-center gap-4">
+      <span class="text-sm">رمزگذاری</span>
+      <div class="relative w-16 h-8 bg-gray-600 rounded-full cursor-pointer" onclick="toggleMode()" id="modeSwitch">
+        <div id="switchHandle" class="absolute top-1 left-1 w-6 h-6 bg-purple-500 rounded-full transition-all"></div>
+      </div>
+      <span class="text-sm">رمزگشایی</span>
+    </div>
+  </header>
+
+  <!-- محتوای اصلی -->
+  <main class="flex items-center justify-center p-8">
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-xl">
+      <h2 id="modeTitle" class="text-2xl font-semibold text-center mb-6">🔒 حالت: رمزگذاری</h2>
+
+      <label class="block mb-2 text-sm font-medium">متن ورودی:</label>
+      <textarea id="inputText" rows="4" class="w-full p-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4" placeholder="متن یا رمز وارد کن..."></textarea>
+
+      <button onclick="processText()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-semibold w-full mb-4" id="actionButton">رمزگذاری</button>
+
+      <label class="block mb-2 text-sm font-medium">نتیجه:</label>
+      <div class="relative">
+        <textarea id="outputText" rows="4" readonly class="w-full p-3 rounded-lg bg-gray-700 text-white focus:outline-none mb-2"></textarea>
+        <button onclick="copyToClipboard()" class="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">📋 کپی</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const fixedKey = 'mySuperSecretKey123';
+    let mode = 'encrypt'; // حالت اولیه
+
+    function toggleMode() {
+      mode = mode === 'encrypt' ? 'decrypt' : 'encrypt';
+      document.getElementById('modeTitle').textContent = mode === 'encrypt' ? '🔒 حالت: رمزگذاری' : '🔓 حالت: رمزگشایی';
+      document.getElementById('actionButton').textContent = mode === 'encrypt' ? 'رمزگذاری' : 'رمزگشایی';
+
+      // تغییر موقعیت دسته سوییچ
+      const handle = document.getElementById('switchHandle');
+      handle.style.left = mode === 'encrypt' ? '1px' : 'calc(100% - 25px)';
+    }
+
+    function processText() {
+      const text = document.getElementById('inputText').value;
+      let result = '';
+      if (mode === 'encrypt') {
+        result = CryptoJS.AES.encrypt(text, fixedKey).toString();
+      } else {
+        try {
+          const decrypted = CryptoJS.AES.decrypt(text, fixedKey);
+          result = decrypted.toString(CryptoJS.enc.Utf8) || '❌ رمزگشایی ناموفق بود!';
+        } catch {
+          result = '❌ خطا در رمزگشایی!';
+        }
+      }
+      document.getElementById('outputText').value = result;
+    }
+
+    function copyToClipboard() {
+      const output = document.getElementById('outputText');
+      output.select();
+      document.execCommand('copy');
+      alert('✅ کپی شد!');
+    }
+  </script>
+</body>
+</html>
